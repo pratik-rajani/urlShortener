@@ -1,10 +1,5 @@
-/*
- * CacheConfig class
- * Author : Sachin Chauhan
- * 
- *  This class is for Connect Redis server for 
- */
 package com.proptiger.urlShortener.config;
+
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -32,9 +27,9 @@ public class CachingConfig extends CachingConfigurerSupport{
     }
     
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf){
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory){
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<String, String>();
-        redisTemplate.setConnectionFactory(cf);
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
          System.out.println("Redis Template created");
         return redisTemplate;
     }

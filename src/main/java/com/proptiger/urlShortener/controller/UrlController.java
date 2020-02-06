@@ -1,9 +1,5 @@
 package com.proptiger.urlShortener.controller;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,13 +26,14 @@ public class UrlController {
 
 	@RequestMapping(value = "v0/url", method = RequestMethod.POST)
 	@ResponseBody
-	public String createUrl(@RequestBody LongUrl longUrl) {
+	public ShortUrl createUrl(@RequestBody LongUrl longUrl) {
 		return urlService.createUrl(longUrl);
 	}
 
 	@RequestMapping(value = "v0/url", method = RequestMethod.GET)
 	@ResponseBody
 	public String getLongUrl(@RequestParam(required = true) String shortUrl) {
+		//return "redirect:"+urlService.getLongUrl(shortUrl);
 		return urlService.getLongUrl(shortUrl);
 	}
 	
@@ -48,13 +45,13 @@ public class UrlController {
 	
 	@RequestMapping(value = "v0/url/createcount", method = RequestMethod.GET)
 	@ResponseBody 
-	public BigDecimal getUrlCreatedCountInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
+	public Long getUrlCreatedCountInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
 		return urlService.getCreatedUrlCountInRange(startDate, endDate); 
 	}
 	 
 	@RequestMapping(value = "v0/url/hitcount", method = RequestMethod.GET)
 	@ResponseBody 
-	public BigDecimal getUrlHitCountInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
+	public Long getUrlHitCountInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
 		return urlService.getHitUrlCountInRange(startDate, endDate); 
 	}
 }

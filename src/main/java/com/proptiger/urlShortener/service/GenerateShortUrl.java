@@ -42,4 +42,15 @@ public class GenerateShortUrl {
 		
 		return stringBuilder.toString();
 	}
+	
+	/*
+	 * public Long generateIdFromLongUrl(String longUrl) {
+	 * 
+	 * long primeNumber = 67280421310721L, x = 31, id = 0;
+	 * 
+	 * for(int i=0;i<longUrl.length();i++) { id = (id*x +
+	 * longUrl.charAt(i))%primeNumber; }
+	 * 
+	 * return id; }
+	 */
 }

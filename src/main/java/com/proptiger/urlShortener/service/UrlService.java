@@ -34,6 +34,9 @@ public class UrlService {
 	@Autowired
 	private UpdateDailyReport				updateDailyReport;
 	
+	@Autowired
+	private ResponseUrl						responseUrl;
+	
 	/* create a short-URL given long-URL */
 	
 	public ShortUrl createUrl(LongUrl longUrl) {
@@ -62,7 +65,7 @@ public class UrlService {
 
 	/* get long-URL given short-URL */
 	
-	public String getLongUrl(String shortUrl) {
+	public ResponseUrl getLongUrl(String shortUrl) {
 		
 		String[] url = shortUrl.split("/");
 		String shortUrlString = url[1];
@@ -75,10 +78,11 @@ public class UrlService {
 
 		}
 		catch (NotFoundException e) {
-			return e.getMessage();
+			System.out.println(e.getMessage());
 		}
-
-		return shortUrlIsPresent;
+		
+		responseUrl.setResponseUrl(shortUrlIsPresent);
+		return responseUrl;
 	}
 	
 	/* delete short-URL and long-URL from database given short-URL */

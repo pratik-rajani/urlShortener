@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.proptiger.urlShortener.model.LongUrl;
 import com.proptiger.urlShortener.model.ShortUrl;
+import com.proptiger.urlShortener.service.ResponseUrl;
 import com.proptiger.urlShortener.service.UrlService;
 
 @Controller
@@ -32,7 +33,7 @@ public class UrlController {
 
 	@RequestMapping(value = "v0/url", method = RequestMethod.GET)
 	@ResponseBody
-	public String getLongUrl(@RequestParam(required = true) String shortUrl) {
+	public ResponseUrl getLongUrl(@RequestParam(required = true) String shortUrl) {
 		//return "redirect:"+urlService.getLongUrl(shortUrl);
 		return urlService.getLongUrl(shortUrl);
 	}

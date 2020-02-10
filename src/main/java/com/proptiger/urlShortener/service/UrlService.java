@@ -49,7 +49,7 @@ public class UrlService {
 			return	shortUrlDao.findByLongUrl(longUrlIsPresent); 
 		
 		/* Long-URL is not present */
-		
+			
 		LongUrl longUrlSaved = longUrlDao.save(longUrl);	// save long-URL in database
 		long id = longUrlSaved.getId();		
 		String shortUrlString = generateShortUrl.generateShortUrlFromId(id);	// generate short-URL from id
@@ -73,7 +73,7 @@ public class UrlService {
 		
 		try {
 
-			shortUrlIsPresent = cacheSupport.findByShortUrl(shortUrlString);			
+			shortUrlIsPresent = cacheSupport.findByShortUrl(shortUrlString);		
 			updateDailyReport.updateUrlCount("hit");	// if short-URL is present in database, update daily report 
 
 		}
@@ -81,7 +81,7 @@ public class UrlService {
 			System.out.println(e.getMessage());
 		}
 		
-		responseUrl.setResponseUrl(shortUrlIsPresent);
+		responseUrl.setResponseUrl(shortUrlIsPresent);	
 		return responseUrl;
 	}
 	
@@ -102,11 +102,13 @@ public class UrlService {
 
 		Date startDate = parseStringToDate(startDateString);	// parse given string to date 
 		Date endDate = parseStringToDate(endDateString);
-		
-		if(!isValidDates(startDate, endDate))
-			return -1L;
-		
-		urlCountInRange = dailyReportDao.countCreatedUrlByDateBetween(startDate, endDate).longValue();
+	
+		try {
+			urlCountInRange = dailyReportDao.countCreatedUrlByDateBetween(startDate, endDate).longValue();
+		}
+		catch (Exception e) {
+			return isValidDates(startDate, endDate);
+		}
 		
 		return urlCountInRange; 
 	}
@@ -120,10 +122,12 @@ public class UrlService {
 		Date startDate = parseStringToDate(startDateString);
 		Date endDate = parseStringToDate(endDateString);
 		
-		if(!isValidDates(startDate, endDate)) 
-			return -1L;
-
-		urlCountInRange = dailyReportDao.countHitUrlByDateBetween(startDate, endDate).longValue();
+		try {
+			urlCountInRange = dailyReportDao.countHitUrlByDateBetween(startDate, endDate).longValue();
+		}
+		catch (Exception e) {
+			return isValidDates(startDate, endDate);
+		}
 		
 		return urlCountInRange; 
 	}
@@ -141,16 +145,20 @@ public class UrlService {
 		return date;
 	}
 	
-	private boolean isValidDates(Date startDate, Date endDate) {
+	private long isValidDates(Date startDate, Date endDate) {
 		
 		Date latestDate = dailyReportDao.findLatestDate();	// database does not have entry after latest date
+		Date firstDate = dailyReportDao.findFirstDate();
 		
 		if(startDate.after(endDate))	// start date should be before end date
-			return false;
+			return -1;
 		
 		if(startDate.after(latestDate))	// start date should be before latest date
-			return false;
+			return 0;
 		
-		return true;
+		if(endDate.before(firstDate)) // end date should be after first date
+			return 0;
+		
+		return -2;
 	}
 }

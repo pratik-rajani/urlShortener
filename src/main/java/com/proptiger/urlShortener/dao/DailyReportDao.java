@@ -20,4 +20,7 @@ public interface DailyReportDao extends JpaRepository<DailyReport, Date>{
 	
 	@Query(value = "select URL_shortener.daily_report.date from URL_shortener.daily_report order by date desc limit 1", nativeQuery = true)
 	public Date findLatestDate();
+	
+	@Query(value = "select URL_shortener.daily_report.date from URL_shortener.daily_report order by date limit 1", nativeQuery = true)
+	public Date findFirstDate();
 }

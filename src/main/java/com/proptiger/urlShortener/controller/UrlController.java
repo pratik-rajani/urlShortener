@@ -34,7 +34,6 @@ public class UrlController {
 	@RequestMapping(value = "v0/url", method = RequestMethod.GET)
 	@ResponseBody
 	public ResponseUrl getLongUrl(@RequestParam(required = true) String shortUrl) {
-		//return "redirect:"+urlService.getLongUrl(shortUrl);
 		return urlService.getLongUrl(shortUrl);
 	}
 	

@@ -18,9 +18,13 @@ public interface DailyReportDao extends JpaRepository<DailyReport, Date>{
 	@Query(value = "select sum(URL_shortener.daily_report.hit_url_count) from URL_shortener.daily_report where URL_shortener.daily_report.date between ?1 and ?2", nativeQuery = true)
 	public BigDecimal countHitUrlByDateBetween(Date startDate, Date endDate);
 	
-	@Query(value = "select URL_shortener.daily_report.date from URL_shortener.daily_report order by date desc limit 1", nativeQuery = true)
-	public Date findLatestDate();
-	
-	@Query(value = "select URL_shortener.daily_report.date from URL_shortener.daily_report order by date limit 1", nativeQuery = true)
-	public Date findFirstDate();
+	/*
+	 * @Query(value =
+	 * "select URL_shortener.daily_report.date from URL_shortener.daily_report order by date desc limit 1"
+	 * , nativeQuery = true) public Date findLatestDate();
+	 * 
+	 * @Query(value =
+	 * "select URL_shortener.daily_report.date from URL_shortener.daily_report order by date limit 1"
+	 * , nativeQuery = true) public Date findFirstDate();
+	 */
 }

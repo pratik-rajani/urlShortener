@@ -10,16 +10,21 @@ import com.proptiger.urlShortener.model.LongUrl;
 import com.proptiger.urlShortener.model.ShortUrl;
 
 @Repository
-public interface ShortUrlDao extends JpaRepository<ShortUrl, Long>{
+public interface ShortUrlDao extends JpaRepository<ShortUrl, String>{
 
 	public ShortUrl findByLongUrl(LongUrl longUrl);
 	
 	@Query(value = "select * from URL_shortener.short_url as s where s.short_url = ?1", nativeQuery = true)
 	public ShortUrl findByShortUrl(String shortUrl);
 	
-	@Modifying
-	@Transactional
-	@Query(value = "delete from URL_shortener.short_url where URL_shortener.short_url.short_url = ?1", nativeQuery = true)
-	public void deleteByShortUrl(String shortUrl);
+	/*
+	 * @Modifying
+	 * 
+	 * @Transactional
+	 * 
+	 * @Query(value =
+	 * "delete from URL_shortener.short_url where URL_shortener.short_url.short_url = ?1"
+	 * , nativeQuery = true) public void deleteByShortUrl(String shortUrl);
+	 */
 	 
 }

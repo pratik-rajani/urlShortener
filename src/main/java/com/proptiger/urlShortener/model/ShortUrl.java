@@ -17,23 +17,12 @@ import javax.persistence.Table;
 public class ShortUrl {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
-	
 	@Column(name = "short_url", nullable = false)
 	private String shortUrl;
 	
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "url_id", nullable = false, unique = true)
 	private LongUrl longUrl;
-	
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
 
 	public String getShortUrl() {
 		return shortUrl;

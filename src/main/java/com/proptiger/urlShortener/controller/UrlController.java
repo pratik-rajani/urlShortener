@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.proptiger.urlShortener.model.DailyReport;
 import com.proptiger.urlShortener.model.LongUrl;
 import com.proptiger.urlShortener.model.ShortUrl;
 import com.proptiger.urlShortener.service.ResponseUrl;
@@ -27,7 +28,7 @@ public class UrlController {
 
 	@RequestMapping(value = "v0/url", method = RequestMethod.POST)
 	@ResponseBody
-	public ShortUrl createUrl(@RequestBody LongUrl longUrl) {
+	public ResponseUrl createUrl(@RequestBody LongUrl longUrl) {
 		return urlService.createUrl(longUrl);
 	}
 
@@ -37,21 +38,15 @@ public class UrlController {
 		return urlService.getLongUrl(shortUrl);
 	}
 	
-	@RequestMapping(value = "v0/url/delete")
+	@RequestMapping(value = "v0/url", method = RequestMethod.DELETE)
 	@ResponseBody
-	public void deleteUrl(@RequestParam(required = true) String shortUrl) {
-		urlService.deleteUrl(shortUrl);
+	public String deleteUrl(@RequestParam(required = true) String shortUrl) {
+		return urlService.deleteUrl(shortUrl);
 	}
 	
-	@RequestMapping(value = "v0/url/createcount", method = RequestMethod.GET)
+	@RequestMapping(value = "v0/url/dailyreport", method = RequestMethod.GET)
 	@ResponseBody 
-	public Long getUrlCreatedCountInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
-		return urlService.getCreatedUrlCountInRange(startDate, endDate); 
-	}
-	 
-	@RequestMapping(value = "v0/url/hitcount", method = RequestMethod.GET)
-	@ResponseBody 
-	public Long getUrlHitCountInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
-		return urlService.getHitUrlCountInRange(startDate, endDate); 
+	public DailyReport dailyReportInRange(@RequestParam(required = true) String startDate, @RequestParam String endDate) { 
+		return urlService.dailyReportInRange(startDate, endDate); 
 	}
 }

@@ -17,39 +17,40 @@ public class CacheSupport {
 	@Autowired
 	private ShortUrlDao shortUrlDao;
 	
-	@Autowired
-	private LongUrlDao 	longUrlDao;
-	
 	/* find long-URL in cache or database */
 	
-	@Cacheable(value = "UrlCache", unless = "#result == null")	// returns long-URL if available in cache
-	public String findByShortUrl(String shortUrlString) throws NotFoundException {
+	@Cacheable(value = "UrlCache", key = "#shortUrlString", unless = "#result == null")	// returns long-URL if available in cache
+	public String findByShortUrl(String shortUrlString, String domain) throws NotFoundException {
 		System.out.println("short-URL is not present in cache");
 		/* short-URL is not present in cache */
-		
-		 LongUrl findLongUrl = null;
-	 
+			
 		 ShortUrl shortUrl = shortUrlDao.findByShortUrl(shortUrlString);	// find short-URL from database 
-		
+		 
 		 if(shortUrl == null || !shortUrlString.equals(shortUrl.getShortUrl()))
 			 throw new NotFoundException("URL is not present!");
 		 
-		 return shortUrl.getLongUrl().getLongUrl();
+		 LongUrl longUrl = shortUrl.getLongUrl();
+		 
+		 if(!domain.equals(longUrl.getDomain()))
+			 throw new NotFoundException("Domain does not match!");
+		 
+		 return longUrl.getLongUrl();
 	}
 
 	/* delete short & long URLs from cache (if present) and database */
 	
-	@CacheEvict("UrlCache")
-	public void deleteUrl(String shortUrl) {
+	@CacheEvict(value = "UrlCache", key = "#shortUrlString")
+	public String deleteUrl(String shortUrlString, String domain) {
 		
 		  try { 
-			  LongUrl longUrl = shortUrlDao.findByShortUrl(shortUrl).getLongUrl();
-			  shortUrlDao.deleteByShortUrl(shortUrl); // delete URL from database
-			  longUrlDao.delete(longUrl);
-			  System.out.println("Deleted short url '"+shortUrl+"' successfully!"); 
+			  ShortUrl shortUrl = shortUrlDao.findOne(shortUrlString);
+			  if(!domain.equals(shortUrl.getLongUrl().getDomain()))
+				  return "Domain does not match!";
+			  shortUrlDao.delete(shortUrl);
+			  return "Deleted short url '"+domain+"/"+shortUrlString+"' successfully!"; 
 		  } 
 		  catch (Exception e) { 
-			  System.out.println(e.getMessage()); 
+			  return "URL not found!";
 		  }	
 	}
 }

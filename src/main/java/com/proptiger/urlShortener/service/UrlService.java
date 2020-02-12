@@ -10,6 +10,7 @@ import com.proptiger.urlShortener.dao.DailyReportDao;
 import com.proptiger.urlShortener.dao.LongUrlDao;
 import com.proptiger.urlShortener.dao.ShortUrlDao;
 import com.proptiger.urlShortener.exception.NotFoundException;
+import com.proptiger.urlShortener.model.DailyReport;
 import com.proptiger.urlShortener.model.LongUrl;
 import com.proptiger.urlShortener.model.ShortUrl;
 
@@ -35,18 +36,21 @@ public class UrlService {
 	private UpdateDailyReport				updateDailyReport;
 	
 	@Autowired
-	private ResponseUrl						responseUrl;
+	private ResponseUrl						responseUrlShort, responseUrlLong;
 	
 	/* create a short-URL given long-URL */
 	
-	public ShortUrl createUrl(LongUrl longUrl) {
+	public ResponseUrl createUrl(LongUrl longUrl) {
 		
 		/* If given long-URL is already present, returns short-URL */
 		
 		LongUrl longUrlIsPresent = longUrlDao.findByLongUrl(longUrl.getLongUrl());
 		
-		if(longUrlIsPresent != null)
-			return	shortUrlDao.findByLongUrl(longUrlIsPresent); 
+		if(longUrlIsPresent != null) {
+			String shortUrl = shortUrlDao.findByLongUrl(longUrlIsPresent).getShortUrl();
+			responseUrlShort.setResponseUrl(longUrlIsPresent.getDomain()+"/"+shortUrl);
+			return responseUrlShort;
+		}
 		
 		/* Long-URL is not present */
 			
@@ -60,20 +64,23 @@ public class UrlService {
 			
 		updateDailyReport.updateUrlCount("create");	// update daily report
 		
-		return shortUrl;	
+		responseUrlShort.setResponseUrl(longUrl.getDomain()+"/"+shortUrlString);
+		return responseUrlShort;	
 	}
 
 	/* get long-URL given short-URL */
 	
-	public ResponseUrl getLongUrl(String shortUrl) {
+	public ResponseUrl getLongUrl(String shortUrlString) {
 		
-		String[] url = shortUrl.split("/");
-		String shortUrlString = url[1];
-		String shortUrlIsPresent = null;
+		String[] shortUrl = shortUrlString.split("/");
+		String domain = shortUrl[0];
+		shortUrlString = shortUrl[1];
+
+		String longUrlString = null;
 		
 		try {
 
-			shortUrlIsPresent = cacheSupport.findByShortUrl(shortUrlString);		
+			longUrlString = cacheSupport.findByShortUrl(shortUrlString, domain);	
 			updateDailyReport.updateUrlCount("hit");	// if short-URL is present in database, update daily report 
 
 		}
@@ -81,55 +88,41 @@ public class UrlService {
 			System.out.println(e.getMessage());
 		}
 		
-		responseUrl.setResponseUrl(shortUrlIsPresent);	
-		return responseUrl;
+		responseUrlLong.setResponseUrl(longUrlString);	
+		return responseUrlLong;
 	}
 	
 	/* delete short-URL and long-URL from database given short-URL */
 	
-	public void deleteUrl(String shortUrl) {
-		
-		String[] url = shortUrl.split("/");
-		String shortUrlString = url[1];
-		cacheSupport.deleteUrl(shortUrlString);
+	public String deleteUrl(String shortUrlString) {
+		String[] shortUrl = shortUrlString.split("/");
+		String domain = shortUrl[0];
+		shortUrlString = shortUrl[1];
+		return cacheSupport.deleteUrl(shortUrlString, domain);
 	}
 	
 	/* returns number of URLs created between given range of dates */
 	
-	public Long getCreatedUrlCountInRange(String startDateString, String endDateString) {
+	public DailyReport dailyReportInRange(String startDateString, String endDateString) {
 	  
-		long urlCountInRange = 0;
+		long createdUrlCount = 0, hitUrlCount = 0;
 
 		Date startDate = parseStringToDate(startDateString);	// parse given string to date 
 		Date endDate = parseStringToDate(endDateString);
+		
+		DailyReport dailyReport = new DailyReport();
 	
 		try {
-			urlCountInRange = dailyReportDao.countCreatedUrlByDateBetween(startDate, endDate).longValue();
+			createdUrlCount = dailyReportDao.countCreatedUrlByDateBetween(startDate, endDate).longValue();
+			hitUrlCount = dailyReportDao.countHitUrlByDateBetween(startDate, endDate).longValue();
 		}
 		catch (Exception e) {
-			return isValidDates(startDate, endDate);
+			System.out.print(e.getMessage());
 		}
 		
-		return urlCountInRange; 
-	}
-	
-	/* returns number of URLs hit between given range of dates */
-	
-	public Long getHitUrlCountInRange(String startDateString, String endDateString) {
-		  
-		long urlCountInRange = 0;
-
-		Date startDate = parseStringToDate(startDateString);
-		Date endDate = parseStringToDate(endDateString);
-		
-		try {
-			urlCountInRange = dailyReportDao.countHitUrlByDateBetween(startDate, endDate).longValue();
-		}
-		catch (Exception e) {
-			return isValidDates(startDate, endDate);
-		}
-		
-		return urlCountInRange; 
+		dailyReport.setCreatedUrlCount(createdUrlCount);
+		dailyReport.setHitUrlCount(hitUrlCount);
+		return dailyReport; 
 	}
 	
 	private Date parseStringToDate(String dateString) {
@@ -147,18 +140,19 @@ public class UrlService {
 	
 	private long isValidDates(Date startDate, Date endDate) {
 		
-		Date latestDate = dailyReportDao.findLatestDate();	// database does not have entry after latest date
-		Date firstDate = dailyReportDao.findFirstDate();
+		//Date latestDate = dailyReportDao.findLatestDate();	// database does not have entry after latest date
+		//Date firstDate = dailyReportDao.findFirstDate();
 		
 		if(startDate.after(endDate))	// start date should be before end date
 			return -1;
+		/*
+		 * if(startDate.after(latestDate)) // start date should be before latest date
+		 * return 0;
+		 * 
+		 * if(endDate.before(firstDate)) // end date should be after first date return
+		 * 0;
+		 */
 		
-		if(startDate.after(latestDate))	// start date should be before latest date
-			return 0;
-		
-		if(endDate.before(firstDate)) // end date should be after first date
-			return 0;
-		
-		return -2;
+		return 0;
 	}
 }
